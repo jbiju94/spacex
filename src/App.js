@@ -1,25 +1,24 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from 'react';
+import ListComponent from './List/smart-list';
+import FilterComponent from './List/filter-bar';
+import './index.css';
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="Desktop1">
+      <div className="Header">
+        <img
+          className="Logo"
+          src="http://lofrev.net/wp-content/photos/2017/05/Spacex_logo.png"
+        />
+        <div className="Rectangle1" />
+      </div>
+      <div class="SubHeader">
+        <FilterComponent />
+      </div>
+      <div className="Table">
+        <ListComponent />
+      </div>
     </div>
   );
 }
-
-export default App;
