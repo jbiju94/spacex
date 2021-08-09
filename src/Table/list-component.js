@@ -1,10 +1,15 @@
 import React from 'react';
 import 'react-smart-data-table/dist/react-smart-data-table.css';
 import SmartDataTable from 'react-smart-data-table';
+import {
+  BrowserRouter as Router,
+  Link,
+  useLocation
+} from "react-router-dom";
 
 function ListComponent() {
   const emptyTableD = <div>There is no data available at the time.</div>;
-
+  const base_url = 'https://api.spacexdata.com/v3/launches';
   const headers = {
     columnKey: {
       text: '-',
@@ -85,14 +90,13 @@ function ListComponent() {
     console.log(rowData, tableData[rowIndex]);
   };
 
-  let search = window.location.search;
-  let params = new URLSearchParams(search);
-  let foo = params.get('query');
+  //TODO: Lazy loading 
+  let filters = useQuery();
+  let statusFilter = filters.get("status")
+  
+  console.log(statusFilter);
 
-  console.log(foo);
-
-  //const filter = null;
-  const api = 'https://api.spacexdata.com/v3/launches?'; //+ filter;
+  let api = base_url
 
   return (
     <SmartDataTable
@@ -102,6 +106,7 @@ function ListComponent() {
       name="space-x"
       className="ui compact selectable table"
       sortable
+      filterValue={statusFilter}
       emptyTable={emptyTableD}
       showOnRowClick={true}
       perPage={20}
@@ -129,4 +134,8 @@ function funDate(date) {
 
   return [year, month, day].join('-');
   */
+}
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
 }
