@@ -94,8 +94,6 @@ function ListComponent() {
   let filters = useQuery();
   let statusFilter = filters.get("status")
   
-  console.log(statusFilter);
-
   let api = base_url
 
   return (
