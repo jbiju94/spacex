@@ -4,16 +4,20 @@ import Select from "react-select";
 import { useHistory } from "react-router-dom"
 import {useLocation } from "react-router-dom";
 
-function FilterComponent() {
-  const [query, setQuery] = useState("");
-  const history = useHistory();
-
+function StatusFilterComponent() {
   const options = [
     { value: "", label: "Spring" },
     { value: "Failed", label: "Failed Launches" },
     { value: "Success", label: "Sucessful Launches" },
     { value: "Upcoming", label: "Upcoming Launches" }
   ];
+
+  const params = useQuery()
+  const initailFilter = getInitalValue(params, options)
+  const [query, setQuery] = useState(params.get('status'));
+  const history = useHistory();
+
+  
 
   function handleChange(selectedOption) {
     setQuery(selectedOption.value);
@@ -25,15 +29,17 @@ function FilterComponent() {
   
   useEffect(() => {
     const params = new URLSearchParams();
-    console.log(params.keys())
+    console.log("Inside useEffect")
+    console.log(query)
     if (query) {
       params.append('status', query);
     } else {
       params.delete('status');
     }
-    //history.push({search: params.toString()})
+    history.push({search: params.toString()})
   }, [query, history]);
 
+  console.log(initialValue)
 
   return (
     <Select
@@ -44,7 +50,7 @@ function FilterComponent() {
   );
 }
 
-export default FilterComponent;
+export default StatusFilterComponent;
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
