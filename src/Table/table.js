@@ -1,6 +1,7 @@
 import ListComponent from "./list-component";
 import StatusFilterComponent from "./status-filter-component";
 import "./index.css";
+import DatePickerComponent from '../DateFilter/date-picker';
 
 /*
 export default function ListPage() {
@@ -43,7 +44,7 @@ export default function ListPage() {
         <div class="row">
           <div class="ui grid">
             <div class="left floated six wide column">
-              
+            <DatePickerComponent />
             </div>
             <div class="right floated five wide column">
               <StatusFilterComponent />

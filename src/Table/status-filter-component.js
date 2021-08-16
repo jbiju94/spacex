@@ -13,7 +13,6 @@ function StatusFilterComponent() {
   ];
 
   const params = useQuery()
-  const initailFilter = getInitalValue(params, options)
   const [query, setQuery] = useState(params.get('status'));
   const history = useHistory();
 
@@ -25,12 +24,11 @@ function StatusFilterComponent() {
 
   const queryParams = useQuery();
   const initialValue = getInitalValue(queryParams, options);
-  console.log(initialValue);
+
   
   useEffect(() => {
     const params = new URLSearchParams();
-    console.log("Inside useEffect")
-    console.log(query)
+
     if (query) {
       params.append('status', query);
     } else {
@@ -39,7 +37,7 @@ function StatusFilterComponent() {
     history.push({search: params.toString()})
   }, [query, history]);
 
-  console.log(initialValue)
+  
 
   return (
     <Select
@@ -66,6 +64,6 @@ function getInitalValue(params, options){
     }
   }
   
-  console.log(ret);
+  
   return ret;
 }
