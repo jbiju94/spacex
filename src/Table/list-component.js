@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Link, useLocation } from "react-router-dom";
 function ListComponent() {
   const emptyTableD = <div>There is no data available at the time.</div>;
   const base_url = "https://api.spacexdata.com/v3/launches";
+  var objectMapper = require('object-mapper');
 
   const [modelVisible, setModelVisible] = useState(false);
   const [modeldata, setModelData] = useState();
@@ -66,24 +67,39 @@ function ListComponent() {
   };
 
   const dataResolver = (response) => {
-    let filteredResp = [];
-    for (var i = 0; i < response.length; i++) {
-      filteredResp.push({
-        _id: response[i].flight_number,
-        launch_date_utc: response[i].launch_date_utc,
-        location: response[i].launch_site.site_name,
-        mission: response[i].mission_name,
-        orbit: response[i].rocket.second_stage.payloads[0].orbit, //TODO: Error Handle
-        launchState: response[i].launch_success
-          ? "SUCCESS"
-          : response[i].upcoming
-          ? "UPCOMING"
-          : "FAILED",
-        rocket: response[i].rocket.rocket_name,
-      });
-    }
-    //console.log(filteredResp);
-    return filteredResp;
+    const map = {
+      "flight_number": "_id",
+      "launch_date_utc": "launch_date_utc",
+      "launch_site.site_name": "location",
+      "mission_name": "mission",
+      "rocket.second_stage.payloads[0].orbit" : "orbit",
+      "launchState":"launchState",
+      "rocket.rocket_name":"rocket"
+    };
+
+    const dateFrom = useQuery().filters.get("dateFrom");
+    const dateTo = useQuery().filters.get("dateTo");
+
+    let filteredResponse = [];
+    if ((dateFrom != undefined) && (dateTo != undefined) && (dateFrom != "") && (dateTo != "")){
+      filteredResponse = response.filter((response) => {
+        const currentDate = Date.parse(response.launch_date_utc);
+        const from = Date.parse(dateFrom);
+        const to = Date.parse(dateTo);
+
+        if (from === to) currentDate === from
+        else return isBetween(currentDate, from, to)
+      })
+    } else filteredResponse = response
+
+
+
+    const op = response.map(src=> {
+      src.launchState = src.launch_success ? "SUCCESS" : src.upcoming ? "UPCOMING" : "FAILED";
+      return objectMapper(src, map);
+    })
+    
+    return op;
   };
 
   const onRowClick = (event, { rowData, rowIndex, tableData }) => {
@@ -98,16 +114,13 @@ function ListComponent() {
     setModelVisible(false);
   };
 
-  //TODO: Lazy loading
-  let filters = useQuery();
-  let statusFilter = filters.get("status");
-
-  let api = base_url;
-
+  
+  const statusFilter = useQuery().filters.get("status");
+  
   return (
     <div>
       <SmartDataTable
-        data={api}
+        data={base_url}
         dataKey="_id"
         dataKeyResolver={dataResolver}
         name="space-x"
@@ -135,7 +148,8 @@ function ListComponent() {
             <tbody>
               <tr>
                 <td>John</td>
-                <td>{modeldata? modeldata._id: ""}</td>
+                <td>{modeldata? modeldata._id: " "}
+                </td>
               </tr>
               <tr>
                 <td>Jamie</td>
@@ -166,21 +180,11 @@ export default ListComponent;
 function funDate(date) {
   var theDate = new Date(date);
   return theDate.toLocaleString(); //TODO: Formating Pending
-  /*
-    var d = new Date(date),
-    month = '' + (d.getMonth() + 1),
-    day = '' + d.getDate(),
-    year = d.getFullYear();
-
-  dayName = d.get;
-
-  if (month.length < 2) month = '0' + month;
-  if (day.length < 2) day = '0' + day;
-
-  return [year, month, day].join('-');
-  */
 }
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
+
+const isBetween = (date, min, max) => (date.getTime() >= min.getTime() && date.getTime() <= max.getTime());
+    

@@ -1,8 +1,6 @@
 import 'react-smart-data-table/dist/react-smart-data-table.css';
-import { useState, useEffect } from 'react';
 import Select from "react-select";
-import { useHistory } from "react-router-dom"
-import {useLocation } from "react-router-dom";
+import useQueryParam from "../queryHandler"
 
 function StatusFilterComponent() {
   const options = [
@@ -12,32 +10,13 @@ function StatusFilterComponent() {
     { value: "Upcoming", label: "Upcoming Launches" }
   ];
 
-  const params = useQuery()
-  const [query, setQuery] = useState(params.get('status'));
-  const history = useHistory();
-
-  
+  const [status, setStatus] = useQueryParam("status", "");
 
   function handleChange(selectedOption) {
-    setQuery(selectedOption.value);
+    setStatus(selectedOption.value)
   };
 
-  const queryParams = useQuery();
-  const initialValue = getInitalValue(queryParams, options);
-
-  
-  useEffect(() => {
-    const params = new URLSearchParams();
-
-    if (query) {
-      params.append('status', query);
-    } else {
-      params.delete('status');
-    }
-    history.push({search: params.toString()})
-  }, [query, history]);
-
-  
+  const initialValue = getInitalValue(status, options);
 
   return (
     <Select
@@ -50,20 +29,15 @@ function StatusFilterComponent() {
 
 export default StatusFilterComponent;
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
 
-function getInitalValue(params, options){
-  const query = params.get('status')
+function getInitalValue(status, options){
   let ret = ""
-  if (query && query!= "") {
-    const filtered =  options.filter(item=>item.value === query);
+  if (status && status!= "") {
+    const filtered =  options.filter(item=>item.value === status);
     if (filtered.size == 1){
       ret = filtered[0]
     }
   }
-  
   
   return ret;
 }

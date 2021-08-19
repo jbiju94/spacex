@@ -6,6 +6,7 @@ import YearMonthForm from "./year-month-form";
 import { Modal, Button } from "semantic-ui-react";
 import { useHistory } from "react-router-dom"
 import {useLocation } from "react-router-dom";
+import useQueryParam from "../queryHandler"
 
 const currentYear = new Date().getFullYear();
 const fromMonth = new Date(currentYear, 0);
@@ -13,16 +14,9 @@ const toMonth = new Date(currentYear + 10, 11);
 
 export default function DatePickerComponent() {
   
+  const [dateFrom, setDateFrom] = useQueryParam("dateFrom", "");
+  const [dateTo, setDateTo] = useQueryParam("dateTo", "");
 
-  const params = useQuery();
-  const history = useHistory();
-  
-  console.log(params.get('dateFrom'));
-  const initialDateFrom = params.get('dateFrom') ? params.get('dateFrom') : ""
-  const initialDateTo = params.get('dateTo') ? params.get('dateTo') : ""
-  
-  const [dateFrom, setDateFrom] = useState(initialDateFrom);
-  const [dateTo, setDateTo] = useState(initialDateTo);
   const [state, setState] = useState(getInitialState());
   const [open, setOpen] = useState(false)
 
@@ -37,31 +31,17 @@ export default function DatePickerComponent() {
   function handleDayClick(day) {
     const range = DateUtils.addDayToRange(day, state);
     setState(range);
-    if (range.from) setDateFrom(Date.parse(range.from));
-    if (range.to) setDateTo(Date.parse(range.to));
+    if (range.from) setDateFrom(Date.parse(range.from).toString());
+    if (range.to) setDateTo(Date.parse(range.to).toString());
+    else setDateTo(Date.parse(range.from).toString());
   }
 
   function handleYearMonthChange(month) {
     setState({ month });
   }
 
- 
   const { from, to } = state;
   const modifiers = { start: from, end: to };
-
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (dateFrom) {
-      params.append('dateFrom', dateFrom);
-    } else params.delete('dateFrom');
-      
-    if (dateTo) {
-      params.append('dateTo', dateTo);
-    } else params.delete('dateTo');
-    
-    history.push({search: params.toString()})
-  }, [dateFrom,dateTo,history]);
 
   return (
     <div>
@@ -97,6 +77,3 @@ export default function DatePickerComponent() {
   );
 }
 
-function useQuery() {
-  return new URLSearchParams(useLocation().search);
-}
