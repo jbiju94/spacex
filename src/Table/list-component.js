@@ -77,7 +77,7 @@ function ListComponent() {
       "rocket.rocket_name":"rocket"
     };
 
-    const dateFrom = useQuery().filters.get("dateFrom");
+    /* const dateFrom = useQuery().filters.get("dateFrom");
     const dateTo = useQuery().filters.get("dateTo");
 
     let filteredResponse = [];
@@ -91,7 +91,7 @@ function ListComponent() {
         else return isBetween(currentDate, from, to)
       })
     } else filteredResponse = response
-
+ */
 
 
     const op = response.map(src=> {
@@ -115,7 +115,7 @@ function ListComponent() {
   };
 
   
-  const statusFilter = useQuery().filters.get("status");
+  const statusFilter = useQuery().get("status");
   
   return (
     <div>

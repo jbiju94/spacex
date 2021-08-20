@@ -4,12 +4,11 @@ import DayPicker, { DateUtils } from "react-day-picker";
 import "react-day-picker/lib/style.css";
 import YearMonthForm from "./year-month-form";
 import { Modal, Button } from "semantic-ui-react";
-import { useHistory } from "react-router-dom"
-import {useLocation } from "react-router-dom";
 import useQueryParam from "../queryHandler"
 
 const currentYear = new Date().getFullYear();
-const fromMonth = new Date(currentYear, 0);
+const currentMonth = new Date().getMonth();
+const fromMonth = new Date(currentYear, currentMonth);
 const toMonth = new Date(currentYear + 10, 11);
 
 export default function DatePickerComponent() {

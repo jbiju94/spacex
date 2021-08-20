@@ -1,5 +1,6 @@
 import React from 'react';
 import Select from 'react-select';
+import { useState, useEffect } from "react";
 
 export default function YearMonthForm({
   date,
@@ -35,14 +36,28 @@ export default function YearMonthForm({
     return { label: month, value: i };
   });
 
+  const [month, setMonth] = useState(months[0].value);
+  const [year, setYear] = useState(years[0].value);
+
+
+  function handleMonthChange(e) {
+    setMonth(e.value);
+    onChange(new Date(year, e.value));
+  };
+
+  function handleYearChange(e) {
+    setYear(e.value);
+    onChange(new Date(e.value, month));
+  };
+
   return (
-    <div className="DayPicker-Caption">
+    <form className="DayPicker-Caption">
       <div className="ui grid">
         <div className="ten wide column">
           <Select
             name="month"
             value={months[date.getMonth()]}
-            onChange={onChange}
+            onChange={handleMonthChange}
             options={months}
             styles={styleForMonths}
           />
@@ -51,12 +66,12 @@ export default function YearMonthForm({
           <Select
             name="year"
             value={{ label: date.getFullYear(), value: date.getFullYear() }}
-            onChange={onChange}
+            onChange={handleYearChange}
             options={years}
             styles={styleForYears}
           />
         </div>
       </div>
-    </div>
+    </form>
   );
 }

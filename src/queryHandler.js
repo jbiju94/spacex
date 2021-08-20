@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useHistory } from "react-router-dom"
 
 const getQuery = () => {
   if (typeof window !== "undefined") {
@@ -13,6 +14,8 @@ const getQueryStringVal = (key)=> {
 
 export default function useQueryParam (key,defaultVal) {
   const [query, setQuery] = useState(getQueryStringVal(key) || defaultVal);
+
+  const history = useHistory();
 
   const updateUrl = (newVal) => {
     setQuery(newVal);
@@ -29,7 +32,8 @@ export default function useQueryParam (key,defaultVal) {
     if (typeof window !== "undefined") {
       const { protocol, pathname, host } = window.location;
       const newUrl = `${protocol}//${host}${pathname}?${query.toString()}`;
-      window.history.pushState({}, "", newUrl);
+      history.push({search: query.toString()})
+      //window.history.pushState({}, "", newUrl);
     }
   };
 
