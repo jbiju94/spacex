@@ -1,16 +1,19 @@
 import React from "react";
 import "react-smart-data-table/dist/react-smart-data-table.css";
 import SmartDataTable from "react-smart-data-table";
-import { Button, Header, Icon, Modal } from "semantic-ui-react";
+import { Button, Header, Icon, Modal,Ref } from "semantic-ui-react";
 import { useState, useEffect } from "react";
+import { Pagination } from "semantic-ui-react";
 import { BrowserRouter as Router, Link, useLocation } from "react-router-dom";
+import useQueryParam from "../queryHandler";
 
 function ListComponent() {
   const emptyTableD = <div>There is no data available at the time.</div>;
   const base_url = "https://api.spacexdata.com/v3/launches";
-  var objectMapper = require('object-mapper');
+  var objectMapper = require("object-mapper");
 
   const [modelVisible, setModelVisible] = useState(false);
+  const [page, setPage] = useQueryParam("page", "1");
   const [modeldata, setModelData] = useState();
   const headers = {
     columnKey: {
@@ -68,13 +71,13 @@ function ListComponent() {
 
   const dataResolver = (response) => {
     const map = {
-      "flight_number": "_id",
-      "launch_date_utc": "launch_date_utc",
+      flight_number: "_id",
+      launch_date_utc: "launch_date_utc",
       "launch_site.site_name": "location",
-      "mission_name": "mission",
-      "rocket.second_stage.payloads[0].orbit" : "orbit",
-      "launchState":"launchState",
-      "rocket.rocket_name":"rocket"
+      mission_name: "mission",
+      "rocket.second_stage.payloads[0].orbit": "orbit",
+      launchState: "launchState",
+      "rocket.rocket_name": "rocket",
     };
 
     /* const dateFrom = useQuery().filters.get("dateFrom");
@@ -93,12 +96,15 @@ function ListComponent() {
     } else filteredResponse = response
  */
 
-
-    const op = response.map(src=> {
-      src.launchState = src.launch_success ? "SUCCESS" : src.upcoming ? "UPCOMING" : "FAILED";
+    const op = response.map((src) => {
+      src.launchState = src.launch_success
+        ? "SUCCESS"
+        : src.upcoming
+        ? "UPCOMING"
+        : "FAILED";
       return objectMapper(src, map);
-    })
-    
+    });
+
     return op;
   };
 
@@ -114,12 +120,33 @@ function ListComponent() {
     setModelVisible(false);
   };
 
-  
   const statusFilter = useQuery().get("status");
-  
+  const pageFilter = useQuery().get("page");
+
+  const objectRef = React.useRef(null);
+
+  const PaginationComponent = ({ activePage, totalPages, onPageChange }) => (
+      <Pagination
+        activePage={activePage}
+        totalPages={totalPages}
+        onPageChange={(event, data) => {
+          setPage(data.activePage.toString());
+          onPageChange(event, data);
+        }}
+      />
+  );
+
+  function adjustInitialPage(e) {
+    if(e && pageFilter) {
+      e.state.activePage = pageFilter;
+    }
+  }
+
+
   return (
     <div>
       <SmartDataTable
+        ref={adjustInitialPage}
         data={base_url}
         dataKey="_id"
         dataKeyResolver={dataResolver}
@@ -132,6 +159,7 @@ function ListComponent() {
         perPage={20}
         onRowClick={onRowClick}
         headers={headers}
+        paginator={PaginationComponent}
       />
       <Modal
         open={modelVisible}
@@ -148,8 +176,7 @@ function ListComponent() {
             <tbody>
               <tr>
                 <td>John</td>
-                <td>{modeldata? modeldata._id: " "}
-                </td>
+                <td>{modeldata ? modeldata._id : " "}</td>
               </tr>
               <tr>
                 <td>Jamie</td>
@@ -171,6 +198,7 @@ function ListComponent() {
           </Button>
         </Modal.Actions>
       </Modal>
+      
     </div>
   );
 }
@@ -186,5 +214,5 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-const isBetween = (date, min, max) => (date.getTime() >= min.getTime() && date.getTime() <= max.getTime());
-    
+const isBetween = (date, min, max) =>
+  date.getTime() >= min.getTime() && date.getTime() <= max.getTime();
