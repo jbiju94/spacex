@@ -1,54 +1,45 @@
-import React from 'react';
-import Select from 'react-select';
-import { useState, useEffect } from "react";
+import React from "react";
+import Select from "react-select";
 
 export default function YearMonthForm({
   date,
-  fromMonth,
-  toMonth,
   localeUtils,
-  onChange
+  onChange,
 }) {
   const styleForMonths = {
-    control: base => ({
+    control: (base) => ({
       ...base,
       border: 0,
       width: 120,
       // This line disable the blue border
-      boxShadow: 'none'
-    })
+      boxShadow: "none",
+    }),
   };
   const styleForYears = {
-    control: base => ({
+    control: (base) => ({
       ...base,
       border: 0,
       width: 100,
       // This line disable the blue border
-      boxShadow: 'none'
-    })
+      boxShadow: "none",
+    }),
   };
 
   const years = [];
-  for (let i = fromMonth.getFullYear(); i <= toMonth.getFullYear(); i += 1) {
+  for (let i = 2000; i <= 3000; i += 1) {
     years.push({ label: i, value: i });
   }
   const months = localeUtils.getMonths().map((month, i) => {
     return { label: month, value: i };
   });
 
-  const [month, setMonth] = useState(months[0].value);
-  const [year, setYear] = useState(years[0].value);
-
-
   function handleMonthChange(e) {
-    setMonth(e.value);
-    onChange(new Date(year, e.value));
-  };
+    onChange(new Date(date.getFullYear(),e.value));
+  }
 
   function handleYearChange(e) {
-    setYear(e.value);
-    onChange(new Date(e.value, month));
-  };
+    onChange(new Date(e.value,date.getMonth()));
+  }
 
   return (
     <form className="DayPicker-Caption">
@@ -65,7 +56,7 @@ export default function YearMonthForm({
         <div className="six wide column">
           <Select
             name="year"
-            value={{ label: date.getFullYear(), value: date.getFullYear() }}
+            value={getValue(date.getFullYear(), years)}
             onChange={handleYearChange}
             options={years}
             styles={styleForYears}
@@ -74,4 +65,9 @@ export default function YearMonthForm({
       </div>
     </form>
   );
+}
+
+function getValue(key, list) {
+  const filtered = list.filter((item) => item.value === key);
+  return filtered[0];
 }

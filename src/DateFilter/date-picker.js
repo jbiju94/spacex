@@ -3,76 +3,115 @@ import { useState, useEffect } from "react";
 import DayPicker, { DateUtils } from "react-day-picker";
 import "react-day-picker/lib/style.css";
 import YearMonthForm from "./year-month-form";
-import { Modal, Button } from "semantic-ui-react";
-import useQueryParam from "../queryHandler"
+import DateShortcut from "./date-shortcuts";
+import { Modal, Button, Icon, Grid } from "semantic-ui-react";
+import useQueryParam from "../queryHandler";
 
 const currentYear = new Date().getFullYear();
-const currentMonth = new Date().getMonth();
-const fromMonth = new Date(currentYear, currentMonth);
+const fromMonth = new Date(currentYear, 1);
 const toMonth = new Date(currentYear + 10, 11);
 
 export default function DatePickerComponent() {
-  
   const [dateFrom, setDateFrom] = useQueryParam("dateFrom", "");
   const [dateTo, setDateTo] = useQueryParam("dateTo", "");
 
-  const [state, setState] = useState(getInitialState());
-  const [open, setOpen] = useState(false)
+  const [month, setMonth] = useState(fromMonth);
+  const [range, setRange] = useState(getInitialState());
+  const [open, setOpen] = useState(false);
 
   function getInitialState() {
     return {
       from: undefined,
       to: undefined,
-      month: fromMonth,
     };
   }
 
   function handleDayClick(day) {
-    const range = DateUtils.addDayToRange(day, state);
-    setState(range);
+    const dateRange = DateUtils.addDayToRange(day, range);
+    setRange(dateRange);
+  }
+
+  function setFilters() {
     if (range.from) setDateFrom(Date.parse(range.from).toString());
     if (range.to) setDateTo(Date.parse(range.to).toString());
     else setDateTo(Date.parse(range.from).toString());
   }
 
-  function handleYearMonthChange(month) {
-    setState({ month });
+  function handleResetClick() {
+    setRange(getInitialState());
   }
 
-  const { from, to } = state;
+  function handleYearMonthChange(date) {
+    setMonth(date);
+  }
+
+  function handleDateRangePresetChange(from, to) {
+    setDateFrom(Date.parse(from).toString());
+    setDateTo(Date.parse(to).toString());
+    setOpen(false)
+  }
+
+  const { from, to } = range;
   const modifiers = { start: from, end: to };
 
   return (
     <div>
-      <Modal open={open} 
+      <Modal
+        closeIcon
+        size="small"
+        open={open}
         onClose={() => setOpen(false)}
         onOpen={() => setOpen(true)}
         trigger={<Button>Date Filter</Button>}
       >
         <Modal.Content>
-          <div className="YearNavigation">
-            <DayPicker
-              month={state.month}
-              fromMonth={fromMonth}
-              toMonth={toMonth}
-              selectedDays={[from, { from, to }]}
-              modifiers={modifiers}
-              onDayClick={handleDayClick}
-              numberOfMonths={2}
-              captionElement={({ date, localeUtils }) => (
-                <YearMonthForm
-                  date={date}
+          <Grid>
+            <Grid.Column width={3}>
+              <DateShortcut onDateRangeChange={handleDateRangePresetChange} />
+            </Grid.Column>
+            <Grid.Column width={12}>
+              <div className="YearNavigation">
+                <DayPicker
                   fromMonth={fromMonth}
                   toMonth={toMonth}
-                  localeUtils={localeUtils}
-                  onChange={handleYearMonthChange}
+                  month={month}
+                  selectedDays={[from, { from, to }]}
+                  //modifiers={modifiers}
+                  onDayClick={handleDayClick}
+                  numberOfMonths={2}
+                  captionElement={({ date, localeUtils }) => (
+                    <YearMonthForm
+                      date={date}
+                      localeUtils={localeUtils}
+                      onChange={handleYearMonthChange}
+                    />
+                  )}
                 />
-              )}
-            />
-          </div>
+              </div>
+            </Grid.Column>
+          </Grid>
         </Modal.Content>
+        <Modal.Actions>
+          <Button
+            color="red"
+            onClick={() => {
+              handleResetClick();
+              setFilters();
+            }}
+          >
+            <Icon name="remove" /> Remove
+          </Button>
+          <Button
+            color="green"
+            onClick={() => {
+              setFilters();
+              setOpen(false);
+            }}
+          >
+            <Icon name="checkmark" /> Add
+          </Button>
+        </Modal.Actions>
       </Modal>
     </div>
   );
 }
-
